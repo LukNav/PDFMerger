@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="/static/build/styles/samples.37902ba3b7fe.css" rel="stylesheet" type="text/css">
+
+    <title>Using files from web applications - Example_Using_object_URLs_to_display_images - code sample</title>
+</head>
+<body>
+
+    <div style="height:300px; border:dashed; background-color:antiquewhite;">
+        <input type="file" id="fileElem" multiple="" accept="image/*" style="display:none">
+
+        <a href="#" id="fileSelect">Select some files</a>
+
+        <div id="fileList">
+            <p>No files selected!</p>
+        </div>
+
+        <div id="iFrameFileList">
+            <p>No files selected!</p>
+        </div>
+    </div>
+    
+
+    <div>
+        <form id="form" name="form" action="/uploader" enctype="multipart/form-data" method="post">
+            <div class="buttons">
+                <div class="upload-button">
+                    <div class="label">Click me!</div>
+                    <input id="files" name="files" type="file" size="1" multiple onchange="uploadFiles('files');" />
+                </div>
+            </div>
+        </form>
+    </div>
+
+
+
+    <script>
+        
+
+        const fileSelect = document.getElementById("fileSelect"),
+            fileElem = document.getElementById("fileElem"),
+            fileList = document.getElementById("fileList"),
+            iFrameFileList = document.getElementById("iFrameFileList");
+            
+
+        fileSelect.addEventListener("click", function (e) {
+            if (fileElem) {
+                fileElem.click();
+            }
+            e.preventDefault(); // prevent navigation to "#"
+        }, false);
+
+        fileElem.addEventListener("change", handleFiles, false);
+
+        function handleFiles() {
+            
+
+            if (!this.files.length)
+            {
+                fileList.innerHTML = "<p>No files selected!</p>";
+                iFrameFileList.innerHTML = "<p>No files selected!</p>";
+            }
+
+            else
+            {
+                fileList.innerHTML = "";
+                const list = document.createElement("ul");
+                fileList.appendChild(list);
+
+                iFrameFileList.innerHTML = "";
+                const iFrameList = document.createElement("ul");
+                iFrameFileList.appendChild(iFrameList);
+
+                for (let i = 0; i < this.files.length; i++) {
+
+                    const li = document.createElement("li");
+                    list.appendChild(li);
+
+                    const iFrameLi = document.createElement("li");
+                    iFrameList.appendChild(iFrameLi);
+
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(this.files[i]);
+
+                    const obj_url = URL.createObjectURL(this.files[i]);
+                    const iframe = document.createElement("iframe");
+                    iframe.setAttribute('src', img.src);
+                    
+                    img.height = 60;
+                    iframe.height = 60;
+                    img.onload = function ()
+                    {
+                        URL.revokeObjectURL(this.src);
+                        URL.revokeObjectURL(obj_url);
+                    }
+
+                    li.appendChild(img);
+                    iFrameLi.appendChild(iframe);
+
+                    const info = document.createElement("span");
+                    info.innerHTML = this.files[i].name + ": " + this.files[i].size + " bytes";
+                    li.appendChild(info);
+
+                }
+            }
+        }
+
+        function uploadFiles(inputId) {
+            var input = document.getElementById(inputId);
+            var files = input.files;
+            var formData = new FormData();
+            
+            for (var i = 0; i != files.length; i++) {
+                formData.append("files", files[i]);
+            }
+            //$.ajax(
+            //    {
+            //        url: "/api/Merge/",
+            //        data: formData,
+            //        processData: false,
+            //        contentType: false,
+            //        type: "POST",
+            //        success: function (data) {
+            //            alert("Files Uploaded!");
+            //        },
+            //        error: function (data) {
+            //            alert("ERROR!");
+            //        },
+            //        complete: function (data, status) {
+            //            alert(data + " status:" + status);
+            //        }
+            //    }
+            //);
+            //-----------------------
+           // alert("Files NOT UPLOADED YET!");
+            //var xhr = new XMLHttpRequest();
+            //xhr.open('POST', 'https://localhost:44368/api/Merge/', true);
+            
+            //Send the proper header information along with the request
+            //xhr.setRequestHeader("Content-Type", "application/pdf");
+
+            //xhr.onreadystatechange = function () { // Call a function when the state changes.
+            //    if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            //        alert("Files Uploaded!");
+            //    }
+            //    else {
+            //        alert(this.status);
+            //    }
+            //}
+            //xhr.send(formData);
+            //-------------------------------
+            //alert("Da!");
+            $.ajax({
+                type: "POST",
+                url: "/api/Merge/",
+                contentType: "application/json",
+                data: JSON.stringify({ category: 42, sort: 3, type: "pdf" }),
+                dataType: "json",
+                success: function (json, status) {
+                    if (status != "success") {
+                        alert("Error loading data");
+                        return;
+                    }
+                    alert("Data loaded!");
+                },
+                error: function (result, status, err) {
+                    alert("Error loading data");
+                    return;
+                }
+            });
+            
+
+        }
+       
+
+
+
+    </script>
+
+</body>
+</html>
